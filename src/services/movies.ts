@@ -4,12 +4,16 @@ const API_KEY = 'bf9fd5b7'
 const baseURL = 'https://www.omdbapi.com'
 
 export const getMovies = async (filterText: string): Promise<Movie[]> => {
-  const response = await fetch(`${baseURL}/?apiKey=${API_KEY}&s=${filterText}`)
-  const data = (await response.json()) as MoviesResponse
-  if (data.Response === 'True') {
-    return mappedMovies(data.Search)
-  } else {
-    return []
+  try {
+    const response = await fetch(`${baseURL}/?apiKey=${API_KEY}&s=${filterText}`)
+    const data = (await response.json()) as MoviesResponse
+    if (data.Response === 'True') {
+      return mappedMovies(data.Search)
+    } else {
+      return []
+    }
+  } catch (e) {
+    throw new Error('Error searching movies')
   }
 }
 

@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useMovies } from './composables/useMovies'
+import { useSearch } from './composables/useSearch'
 import MoviesList from './components/MoviesList.vue'
+import { ref } from 'vue'
 
-const searchTerm = ref<string>('')
-
-const { movies, isLoading, isError, searchMoviesByText, hasMovies } = useMovies()
+const sort = ref<boolean>(false)
+const { searchTerm, errorMessage, firstRender } = useSearch()
+const { movies, isLoading, isError, searchMoviesByText, hasMovies } = useMovies(
+  { searchTerm, sort }
+)
 
 const onSubmit = () => {
-  searchMoviesByText(searchTerm.value)
+  searchMoviesByText()
 }
 </script>
 
@@ -17,15 +20,20 @@ const onSubmit = () => {
     <h1>Movies Finder</h1>
 
     <form @submit.prevent="onSubmit" class="form">
-      <input
-        v-model="searchTerm"
-        type="text"
-        placeholder="Avengers, Star Wards, ..."
-      />
-      <button type="submit">Search</button>
+      <div class="input-form">
+        <input
+          :class="errorMessage ? 'input-error' : ''"
+          v-model="searchTerm"
+          type="text"
+          placeholder="Avengers, Star Wards, ..."
+        />
+        <input type="checkbox" v-model="sort" />
+        <button type="submit">Search</button>
+      </div>
+      <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
     </form>
 
-    <section class="movies">
+    <section class="movies-section">
       <template v-if="isLoading">
         <p>Loading...</p>
       </template>
@@ -38,7 +46,7 @@ const onSubmit = () => {
         <template v-if="hasMovies">
           <MoviesList :movies="movies" />
         </template>
-        <template v-else>
+        <template v-else-if="!firstRender">
           <p>Movies not found!</p>
         </template>
       </template>
@@ -47,8 +55,23 @@ const onSubmit = () => {
 </template>
 
 <style scoped>
-.movies {
+.movies-section {
   display: flex;
   justify-content: center;
+  width: 100%;
+}
+
+.input-error {
+  border: 1px solid red;
+}
+
+.input-form {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.error-message {
+  color: red;
 }
 </style>
